@@ -18,11 +18,14 @@ class LoggerAdapter:
     def log(self, x: str):
         self.logger.info(x)
 
+
 DSPyTrace = list[tuple[Any, dict[str, Any], Prediction]]
+
 
 class ScoreWithFeedback(Prediction):
     score: float
     feedback: str
+
 
 class PredictorFeedbackFn(Protocol):
     def __call__(
@@ -47,6 +50,7 @@ class PredictorFeedbackFn(Protocol):
         The feedback is a string that is used to guide the evolution of the predictor.
         """
         ...
+
 
 class DspyAdapter(GEPAAdapter[Example, TraceData, Prediction]):
     def __init__(
@@ -85,6 +89,7 @@ class DspyAdapter(GEPAAdapter[Example, TraceData, Prediction]):
         if capture_traces:
             # bootstrap_trace_data-like flow with trace capture
             from dspy.teleprompt.bootstrap_trace import bootstrap_trace_data
+
             trajs = bootstrap_trace_data(
                 program=program,
                 dataset=batch,
@@ -115,7 +120,7 @@ class DspyAdapter(GEPAAdapter[Example, TraceData, Prediction]):
                 return_all_scores=True,
                 failure_score=self.failure_score,
                 provide_traceback=True,
-                max_errors=len(batch) * 100
+                max_errors=len(batch) * 100,
             )
             res = evaluator(program)
             outputs = [r[1] for r in res.results]
@@ -125,6 +130,7 @@ class DspyAdapter(GEPAAdapter[Example, TraceData, Prediction]):
 
     def make_reflective_dataset(self, candidate, eval_batch, components_to_update):
         from dspy.teleprompt.bootstrap_trace import FailedPrediction
+
         program = self.build_program(candidate)
 
         ret_d: dict[str, list[dict[str, Any]]] = {}
@@ -217,9 +223,9 @@ class DspyAdapter(GEPAAdapter[Example, TraceData, Prediction]):
                     )
                     d["Feedback"] = fb["feedback"]
                     if self.keep_module_scores:
-                        d['score'] = module_score
+                        d["score"] = module_score
                     else:
-                        d['score'] = fb['score']
+                        d["score"] = fb["score"]
 
                 items.append(d)
 
