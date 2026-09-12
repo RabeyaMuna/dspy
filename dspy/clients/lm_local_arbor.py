@@ -8,7 +8,7 @@ import requests
 
 import dspy
 from dspy.clients.provider import Provider, ReinforceJob, TrainingJob
-from dspy.clients.utils_finetune import GRPOGroup, TrainDataFormat, TrainingStatus, save_data, MultiGPUConfig
+from dspy.clients.utils_finetune import GRPOGroup, MultiGPUConfig, TrainDataFormat, TrainingStatus, save_data
 
 if TYPE_CHECKING:
     from dspy.clients.lm import LM
@@ -71,7 +71,12 @@ class ArborReinforceJob(ReinforceJob):
         "lora": False,
     }
 
-    def __init__(self, lm: "LM", train_kwargs: GRPOTrainKwargs, gpu_config: MultiGPUConfig = MultiGPUConfig(num_inference_gpus=1, num_training_gpus=1)):
+    def __init__(
+        self,
+        lm: "LM",
+        train_kwargs: GRPOTrainKwargs,
+        gpu_config: MultiGPUConfig = MultiGPUConfig(num_inference_gpus=1, num_training_gpus=1),
+    ):
         # The teleprompter must ensure that this is set
         if "num_generations" not in train_kwargs:
             raise ValueError("num_generations must be set in the training kwargs")
@@ -157,9 +162,7 @@ class ArborReinforceJob(ReinforceJob):
         self.lm.model = ArborProvider._add_provider_prefix(response["current_model"])
         self.provider_job_id = response.get("job_id")
 
-    def _run_grpo_step_one_group(
-        self, train_group: GRPOGroup, train_data_format: TrainDataFormat | str | None = None
-    ):
+    def _run_grpo_step_one_group(self, train_group: GRPOGroup, train_data_format: TrainDataFormat | str | None = None):
         # TODO: Check that the data follows the intended format
         api_base = self.lm.kwargs["api_base"]
         # api_key = self.lm.kwargs["api_key"]
@@ -254,7 +257,9 @@ class ArborProvider(Provider):
         launch_kwargs = launch_kwargs or lm.launch_kwargs
 
         # Make request to launch endpoint
-        response = requests.post(urljoin(api_base, "chat/launch"), json={"model": model, "launch_kwargs": launch_kwargs})
+        response = requests.post(
+            urljoin(api_base, "chat/launch"), json={"model": model, "launch_kwargs": launch_kwargs}
+        )
 
         if response.status_code != 200:
             raise Exception(f"Failed to launch model. Status code: {response.status_code}, Response: {response.text}")
