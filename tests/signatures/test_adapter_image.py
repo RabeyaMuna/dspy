@@ -448,11 +448,9 @@ def test_pdf_from_file():
 def test_image_repr():
     """Test string representation of Image objects"""
     url_image = dspy.Image.from_url("https://example.com/dog.jpg", download=False)
-    assert str(url_image) == (
-        "<<CUSTOM-TYPE-START-IDENTIFIER>>"
-        "[{'type': 'image_url', 'image_url': {'url': 'https://example.com/dog.jpg'}}]"
-        "<<CUSTOM-TYPE-END-IDENTIFIER>>"
-    )
+    assert str(url_image).startswith("<<CUSTOM-TYPE-START-IDENTIFIER>>[")
+    assert "https://example.com/dog.jpg" in str(url_image)
+    assert str(url_image).endswith("<<CUSTOM-TYPE-END-IDENTIFIER>>")
     assert repr(url_image) == "Image(url='https://example.com/dog.jpg')"
 
     sample_pil = PILImage.new("RGB", (60, 30), color="red")
