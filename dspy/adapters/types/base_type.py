@@ -67,7 +67,18 @@ class Type(pydantic.BaseModel):
             try:
                 str_rep = json.dumps(formatted)
             except TypeError:
-                str_rep = formatted
+                # If json.dumps fails, fallback to a safe string representation
+                # by converting each element to string and joining with commas.
+                str_rep = (
+                    "["
+                    + ", ".join(
+                        json.dumps(item)
+                        if isinstance(item, (dict, list, str, int, float, bool, type(None)))
+                        else str(item)
+                        for item in formatted
+                    )
+                    + "]"
+                )
             return f"{CUSTOM_TYPE_START_IDENTIFIER}{str_rep}{CUSTOM_TYPE_END_IDENTIFIER}"
         return formatted
 
@@ -123,8 +134,11 @@ def split_message_content_for_custom_types(messages: list[dict[str, Any]]) -> li
                     parsed = json.loads(custom_type_content)
                 except json.JSONDecodeError:
                     parsed = json_repair.loads(custom_type_content)
-                for custom_type_content in parsed:
-                    result.append(custom_type_content)
+                # Ensure parsed is a list; if it's a dict, wrap it in a list
+                if isinstance(parsed, dict):
+                    parsed = [parsed]
+                for item in parsed:
+                    result.append(item)
 
             except json.JSONDecodeError:
                 # fallback to raw string if it's not valid JSON

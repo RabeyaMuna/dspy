@@ -210,15 +210,20 @@ def test_xml_adapter_formats_nested_images():
     assert len(messages) == 4
 
     # Image information in the few-shot example's user message
-    expected_image1_content = {"type": "image_url", "image_url": {"url": "https://example.com/image1.jpg"}}
-    expected_image2_content = {"type": "image_url", "image_url": {"url": "https://example.com/image2.jpg"}}
-    expected_image3_content = {"type": "image_url", "image_url": {"url": "https://example.com/image3.jpg"}}
-    assert expected_image1_content in messages[1]["content"]
-    assert expected_image2_content in messages[1]["content"]
-    assert expected_image3_content in messages[1]["content"]
+    # The adapter returns a list of content parts; we need to check each part
+    content_parts = messages[1]["content"]
+    # Find the image parts
+    image_parts = [part for part in content_parts if isinstance(part, dict) and part.get("type") == "image_url"]
+    expected_urls = ["https://example.com/image1.jpg", "https://example.com/image2.jpg", "https://example.com/image3.jpg"]
+    actual_urls = [part["image_url"]["url"] for part in image_parts]
+    for url in expected_urls:
+        assert url in actual_urls
 
     # The query image is formatted in the last user message
-    assert {"type": "image_url", "image_url": {"url": "https://example.com/image4.jpg"}} in messages[-1]["content"]
+    content_parts_last = messages[-1]["content"]
+    image_parts_last = [part for part in content_parts_last if isinstance(part, dict) and part.get("type") == "image_url"]
+    assert len(image_parts_last) == 1
+    assert image_parts_last[0]["image_url"]["url"] == "https://example.com/image4.jpg"
 
 
 def test_xml_adapter_with_code():
@@ -238,7 +243,11 @@ def test_xml_adapter_with_code():
     assert dspy.Code.description() in messages[0]["content"]
 
     # The user message should include the question and the tools
-    assert "print('Hello, world!')" in messages[1]["content"]
+    # The adapter returns a list of content parts; we need to check the text part
+    content_parts = messages[1]["content"]
+    text_parts = [part for part in content_parts if isinstance(part, str)]
+    combined_text = "".join(text_parts)
+    assert "print('Hello, world!')" in combined_text
 
     # Test with code as output field
     class CodeGeneration(dspy.Signature):
