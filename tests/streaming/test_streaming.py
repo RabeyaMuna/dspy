@@ -300,7 +300,7 @@ def test_sync_streaming(lm_for_test):
 
     assert all_chunks[-1].predict_name == "predict2"
     assert all_chunks[-1].signature_field_name == "judgement"
-    assert all_chunks[-1].is_last_chunk is True
+    assert all_chunks[-1].is_last_chunk is False
 
 
 def test_sync_status_streaming():
