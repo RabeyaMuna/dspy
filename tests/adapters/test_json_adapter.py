@@ -345,12 +345,12 @@ def test_json_adapter_formats_image_with_few_shot_examples_with_nested_images():
     expected_image1_content = {"type": "image_url", "image_url": {"url": "https://example.com/image1.jpg"}}
     expected_image2_content = {"type": "image_url", "image_url": {"url": "https://example.com/image2.jpg"}}
     expected_image3_content = {"type": "image_url", "image_url": {"url": "https://example.com/image3.jpg"}}
-    assert expected_image1_content in messages[1]["content"]
-    assert expected_image2_content in messages[1]["content"]
-    assert expected_image3_content in messages[1]["content"]
+    assert any(expected_image1_content == item for item in messages[1]["content"])
+    assert any(expected_image2_content == item for item in messages[1]["content"])
+    assert any(expected_image3_content == item for item in messages[1]["content"])
 
     # The query image is formatted in the last user message
-    assert {"type": "image_url", "image_url": {"url": "https://example.com/image4.jpg"}} in messages[-1]["content"]
+    assert any({"type": "image_url", "image_url": {"url": "https://example.com/image4.jpg"}} == item for item in messages[-1]["content"])
 
 
 def test_json_adapter_with_tool():

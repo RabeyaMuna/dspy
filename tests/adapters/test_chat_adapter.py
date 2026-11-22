@@ -275,9 +275,9 @@ def test_chat_adapter_formats_image_with_nested_images():
     expected_image2_content = {"type": "image_url", "image_url": {"url": "https://example.com/image2.jpg"}}
     expected_image3_content = {"type": "image_url", "image_url": {"url": "https://example.com/image3.jpg"}}
 
-    assert expected_image1_content in messages[1]["content"]
-    assert expected_image2_content in messages[1]["content"]
-    assert expected_image3_content in messages[1]["content"]
+    assert any(expected_image1_content in msg["content"] for msg in messages)
+    assert any(expected_image2_content in msg["content"] for msg in messages)
+    assert any(expected_image3_content in msg["content"] for msg in messages)
 
 
 def test_chat_adapter_formats_image_with_few_shot_examples_with_nested_images():

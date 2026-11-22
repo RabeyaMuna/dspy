@@ -281,7 +281,7 @@ def test_sync_streaming(lm_for_test):
             dspy.streaming.StreamListener(signature_field_name="answer"),
             dspy.streaming.StreamListener(signature_field_name="judgement"),
         ],
-        include_final_prediction_in_output_stream=False,
+        include_final_prediction_in_output_stream=True,
         async_streaming=False,
     )
     # Turn off the cache to ensure the stream is produced.
